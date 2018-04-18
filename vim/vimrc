@@ -1,0 +1,166 @@
+if has('vim_starting')
+  set nocompatible
+  " タブを表示するときの幅
+  set tabstop=4
+  " タブを挿入するときの幅
+  set shiftwidth=4
+  " タブをタブとして扱う(スペースに展開しない)
+  set noexpandtab
+  " ファイルタイプ、エンコードタイプを表示
+  set softtabstop=0
+  set laststatus=2
+  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=\ (%v,%l)/%L%8P\
+endif
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+set paste
+set noautoindent
+set nosmartindent
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+noremap <S-h> ^
+noremap <S-l> $
+noremap <silent> <C-T> :NERDTreeToggle<CR>
+" バッファ一覧
+noremap <C-B> :Unite buffer<CR>
+" ファイル一覧
+noremap <C-F> :Unite -buffer-name=file file<CR>
+" 最近使ったファイルの一覧
+noremap <C-H> :Unite file_mru<CR>
+" ESCキーを2回押すと終了する
+au FileType unite nnoremap <silent> <buffer> <ESC><ESC> :q<CR>
+au FileType unite inoremap <silent> <buffer> <ESC><ESC> <ESC>:q<CR>
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"== dein Scripts ================================================
+if &compatible
+  set nocompatible               " Be iMproved
+endif
+
+" Required:
+set runtimepath+=~/.vim/dein/repos/github.com/Shougo/dein.vim
+
+" Required:
+if dein#load_state('~/.vim/dein')
+  call dein#begin('~/.vim/dein')
+
+  " Let dein manage dein
+  " Required:
+  call dein#add('~/.vim/dein/repos/github.com/Shougo/dein.vim')
+
+  " Add or remove your plugins here:
+  call dein#add('Shougo/neosnippet.vim')
+  call dein#add('Shougo/neosnippet-snippets')
+
+  " You can specify revision/branch/tag.
+  call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
+
+
+  """ 括弧でくくるスクリプト """"""""""""""""""""""""""""""""""""
+  call dein#add('tpope/vim-surround')
+  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  """ Tree表示 """"""""""""""""""""""""""""""""""""""""""""""""""
+  call dein#add('scrooloose/nerdtree')
+  "noremap <silent> <C-T> :NERDTreeToggle<CR>
+  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  """ インデントを色付け """"""""""""""""""""""""""""""""""""""""
+  call dein#add('nathanaelkane/vim-inDent-guides')
+  " vimを立ち上げたときに、自動的にvim-indent-guidesをオンにする
+  let g:indent_guides_enable_on_vim_startup = 1
+  set ts=2 sw=2 et
+  " ガイドをスタートするインデントの量
+  let g:indent_guides_start_level=1
+  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  """ カラースキーム """"""""""""""""""""""""""""""""""""""""""""
+  call dein#add ('nanotech/jellybeans.vim')
+  call dein#add ('jacoborus/tender.vim')
+  call dein#add ('AlessandroYorba/Alduin')
+  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  """ node / vue """"""""""""""""""""""""""""""""""""""""""""""""
+  """ スタイル設定
+  call dein#add ('vim-scripts/vim-stylus')
+  """ スタイル設定
+  call dein#add ('othree/yajs.vim')
+  """ JSONスタイル
+  call dein#add ('elzr/vim-json')
+  """ pugスタイル
+  call dein#add ('digitaltoad/vim-pug')
+  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  """ 日本語ヘルプ  """""""""""""""""""""""""""""""""""""""""""""
+  call dein#add('vim-jp/vimdoc-ja')
+  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  """ ゆないと """"""""""""""""""""""""""""""""""""""""""""""""""
+  call dein#add('Shougo/unite.vim')
+  call dein#add('Shougo/neomru.vim')
+  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  " Required:
+  call dein#end()
+  call dein#save_state()
+endif
+
+" Required:
+filetype plugin indent on
+syntax enable
+
+" If you want to install not installed plugins on startup.
+if dein#check_install()
+  call dein#install()
+endif
+
+"== End dein Scripts ================================================
+
+filetype plugin indent on
+filetype indent on
+filetype on
+syntax on
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"挿入モード時、ステータスラインの色を変更
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:hi_insert = 'highlight StatusLine guifg=darkblue guibg=green gui=none ctermfg=blue ctermbg=yellow cterm=none'
+
+if has('syntax')
+  augroup InsertHook
+    autocmd!
+    autocmd InsertEnter * call s:StatusLine('Enter')
+    autocmd InsertLeave * call s:StatusLine('Leave')
+  augroup END
+endif
+
+let s:slhlcmd = ''
+function! s:StatusLine(mode)
+  if a:mode == 'Enter'
+    silent! let s:slhlcmd = 'highlight ' . s:GetHighlight('StatusLine')
+    silent exec g:hi_insert
+  else
+    highlight clear StatusLine
+    silent exec s:slhlcmd
+  endif
+endfunction
+
+function! s:GetHighlight(hi)
+  redir => hl
+  exec 'highlight '.a:hi
+  redir END
+  let hl = substitute(hl, '[\r\n]', '', 'g')
+  let hl = substitute(hl, 'xxx', '', '')
+  return hl
+endfunction
+
+
+""" 起動時の処理  """""
+if has('gui_running')
+  set tw=0
+else
+  colorscheme jellybeans
+  autocmd FileType feature colorscheme Alduin
+endif
+
+""" node / vue """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+autocmd BufRead,BufNewFile *.vue setlocal filetype=vue.html.javascript.css
+

@@ -1,0 +1,68 @@
+# The following lines were added by compinstall
+
+zstyle ':completion:*' list-colors ''
+zstyle ':completion:*' list-prompt '%SAt %p: Hit TAB for more, or the character to insert%s'
+zstyle ':completion:*' menu select=0
+zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+zstyle ':completion:*' use-compctl false
+zstyle :compinstall filename "/home/$HOME/.zshrc"
+
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+
+# aliases
+alias vi=vim
+alias ll="ls -alF"
+
+# git's aliases
+alias gba="git branch -a"
+alias gst="git status"
+alias gch="git checkout"
+
+# for Java
+#export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+#export JAVA_HOME=/usr/java/jdk1.8.0_144
+
+# for ruby
+#export PATH=$HOME/.rbenv/bin:$PATH
+#eval "$(rbenv init -)"
+
+# for mvn
+#export M3_HOME=/opt/apache-maven
+#M3=$M3_HOME/bin
+#export PATH=$M3:$PATH
+
+# node / nvm / yarn
+#export NVM_DIR="$HOME/.nvm"
+#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+#export PATH=$(yarn global bin):$PATH
+
+fpath=(~/.zsh/completion $fpath)
+
+# hisoty
+export HISTFILE=~/.zsh_history
+export HISTSIZE=10000
+export SAVEHIST=100000
+setopt share_history        # share command history data
+setopt HIST_IGNORE_DUPS           # 前と重複する行は記録しない
+setopt HIST_IGNORE_ALL_DUPS       # 履歴中の重複行をファイル記録前に無くす
+setopt HIST_IGNORE_SPACE          # 行頭がスペースのコマンドは記録しない
+setopt HIST_FIND_NO_DUPS          # 履歴検索中、(連続してなくとも)重複を飛ばす
+setopt HIST_REDUCE_BLANKS         # 余分な空白は詰めて記録
+setopt HIST_NO_STORE              # histroyコマンドは記録しない
+
+function peco-select-history() {
+    local tac
+    if which tac > /dev/null; then
+        tac="tac"
+    else
+        tac="tail -r"
+    fi
+    BUFFER=$(history -n 1 | eval $tac | awk '!a[$0]++' | peco --query "$LBUFFER")
+    CURSOR=$#BUFFER
+    # zle clear-screen
+}
+zle -N peco-select-history
+bindkey '^r' peco-select-history
